@@ -94,7 +94,6 @@ func main() {
 	fmt.Println("New Wallet Public key ", wallet.account.PublicKey.String())
 	fmt.Println("New Wallet Private key ", wallet.account.PrivateKey)
 	fmt.Println(wallet.RequestAirdrop(1e9))
-	fmt.Println(wallet.Transfer("74ZC49NnWnRerj2jfcdVrP1xbn1gnqmFWbsv8N8hfe1b", 5e8))
 	fmt.Println(wallet.GetBalance())
 
 }

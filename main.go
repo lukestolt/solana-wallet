@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/portto/solana-go-sdk/client"
@@ -79,6 +80,7 @@ func (w Wallet) Transfer(reciever string, lamports uint64) (string, error) {
 		_, err := w.c.SendTransaction(context.TODO(), tx)
 		if err != nil {
 			failCount++
+			fmt.Println("Fail")
 		} else {
 			return fmt.Sprintf("Took %d seconds to send tx", failCount+1*2), nil
 		}
@@ -89,11 +91,41 @@ func (w Wallet) Transfer(reciever string, lamports uint64) (string, error) {
 
 }
 
+func GetWalletBalance(publicKey string) (uint64, error) {
+	c := client.NewClient(rpc.DevnetRPCEndpoint)
+	return c.GetBalance(context.TODO(), publicKey)
+}
+
 func main() {
+	// import a wallet or create a new wallet
+
+	// create a new wallet with 2 SOL
 	wallet := CreateNewWallet(rpc.DevnetRPCEndpoint)
 	fmt.Println("New Wallet Public key ", wallet.account.PublicKey.String())
 	fmt.Println("New Wallet Private key ", wallet.account.PrivateKey)
-	fmt.Println(wallet.RequestAirdrop(1e9))
-	fmt.Println(wallet.GetBalance())
+	fmt.Println(wallet.RequestAirdrop(2e9))
+	fmt.Println("Recieving Airdrop.....")
+	time.Sleep(10 * time.Second)
+	// address to send SOL to
+	fmt.Print("\nAddress to send SOL to: ")
+	var recieverAddr string
+	fmt.Scan(&recieverAddr)
+	// amount of SOL to send
+	fmt.Print("Amount of lamports to send: ")
+	var lamports uint64
+	fmt.Scan(&lamports)
+	// check that the wallet has enough sol to send
+	balance, _ := wallet.GetBalance()
+	if lamports > balance {
+		fmt.Println("ERROR: wallet balance: " + strconv.FormatUint(balance, 10) +
+			" is < the amount requested to be sent: " + strconv.FormatUint(lamports, 10))
+	}
+	// send the tx
+	wallet.Transfer(recieverAddr, lamports)
+	// verify SOL was recieved
+	curBalance, _ := wallet.GetBalance()
+	otherWalletBalance, _ := GetWalletBalance(recieverAddr)
+	fmt.Println("Your wallets balance: " + strconv.FormatUint(curBalance, 10))
+	fmt.Println("Other wallets balance: " + strconv.FormatUint(otherWalletBalance, 10))
 
 }

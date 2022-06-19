@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/portto/solana-go-sdk/client"
@@ -97,15 +98,36 @@ func GetWalletBalance(publicKey string) (uint64, error) {
 }
 
 func main() {
-	// import a wallet or create a new wallet
+	// import a wallet
+	var privateKeyInput string
+	fmt.Print("\nEnter private key: ")
+	fmt.Scan(&privateKeyInput)
+	fmt.Println(privateKeyInput)
+	// remove all the commas
+	privateKeyInput = strings.ReplaceAll(privateKeyInput, "[", "")
+	privateKeyInput = strings.ReplaceAll(privateKeyInput, "]", "")
+	pkSplit := strings.Split(privateKeyInput, ",")
+	pkByte := [64]byte{}
+	for i := 0; i < len(pkSplit); i++ {
+		pkByte[i] = byte(pkSplit[i])
+	}
 
+	privateKeyInput = strings.ReplaceAll(privateKeyInput, ",", " ")
+	fmt.Println(privateKeyInput)
+	privateKey := []byte(privateKeyInput)
+	wallet, err := ImportOldWallet(privateKey, rpc.DevnetRPCEndpoint)
+	if err != nil {
+		// fmt.Println("\nError finding wallet with private key: " + string([]byte(privateKey)))
+		fmt.Println(err)
+	}
 	// create a new wallet with 2 SOL
-	wallet := CreateNewWallet(rpc.DevnetRPCEndpoint)
-	fmt.Println("New Wallet Public key ", wallet.account.PublicKey.String())
-	fmt.Println("New Wallet Private key ", wallet.account.PrivateKey)
-	fmt.Println(wallet.RequestAirdrop(2e9))
-	fmt.Println("Recieving Airdrop.....")
-	time.Sleep(10 * time.Second)
+	// wallet := CreateNewWallet(rpc.DevnetRPCEndpoint)
+	// fmt.Println("New Wallet Public key ", wallet.account.PublicKey.String())
+	// fmt.Println("New Wallet Private key ", wallet.account.PrivateKey)
+	// fmt.Println(wallet.RequestAirdrop(2e9))
+	// fmt.Println("Recieving Airdrop.....")
+	// time.Sleep(10 * time.Second)
+
 	// address to send SOL to
 	fmt.Print("\nAddress to send SOL to: ")
 	var recieverAddr string
